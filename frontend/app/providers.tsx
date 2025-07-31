@@ -21,9 +21,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <ConnectKitProvider 
           theme="auto"
+          mode="light"
           options={{
             initialChainId: 84532, // Base Sepolia
             walletConnectName: "Base Splitwise",
+            disclaimer: "Connect your wallet to start splitting expenses",
+            hideBalance: true,
+            enforceSupportedChains: false,
           }}
         >
           {children}

@@ -1,0 +1,10 @@
+{
+  "name": "Base Splitwise",
+  "description": "Split expenses with friends onchain",
+  "icon": "/icon.png",
+  "permissions": [
+    "ethereum"
+  ],
+  "chains": ["base-sepolia"],
+  "version": "1.0.0"
+}

@@ -26,42 +26,20 @@ export default function BasePaymentButton({
   }, [])
 
   const amountInEth = formatEther(amount)
+  const amountInWei = amount.toString()
   
-  const handlePayment = () => {
-    if (type === 'send' && !isMobile) {
-      // On desktop for sending, show QR code
+  // Standard Ethereum payment URL
+  const ethereumUrl = `ethereum:${recipientAddress}@84532?value=${amountInWei}`
+  
+  const handleButtonClick = () => {
+    if (!isMobile) {
+      // Desktop: show QR code
       setShowQR(true)
-      return
-    }
-    
-    if (isMobile && type === 'send') {
-      // Try to open wallet app with ethereum: URL
-      const paymentUrl = `ethereum:${recipientAddress}?value=${amount.toString()}`
-      
-      // First, try direct navigation
-      window.location.href = paymentUrl
-      
-      // Also try creating a link element
-      setTimeout(() => {
-        const link = document.createElement('a')
-        link.href = paymentUrl
-        link.style.display = 'none'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      }, 100)
-      
-      // Show copied message as fallback after delay
-      setTimeout(() => {
-        if (document.hasFocus()) {
-          copyToClipboard(recipientAddress)
-        }
-      }, 2000)
     } else if (type === 'request') {
-      // For requesting money, share or copy
+      // Mobile request: share payment details
       const message = `💸 Payment Request\n\nPlease send ${amountInEth} ETH to:\n${recipientAddress}\n\nFor: ${description}\nNetwork: Base Sepolia`
       
-      if (isMobile && navigator.share) {
+      if (navigator.share) {
         navigator.share({
           title: 'Payment Request',
           text: message
@@ -79,7 +57,7 @@ export default function BasePaymentButton({
       setShowCopied(true)
       setTimeout(() => setShowCopied(false), 3000)
     }).catch(() => {
-      // Fallback for older browsers
+      // Fallback
       const textArea = document.createElement('textarea')
       textArea.value = text
       document.body.appendChild(textArea)
@@ -91,11 +69,30 @@ export default function BasePaymentButton({
     })
   }
 
+  // For mobile send button, use a direct link
+  if (isMobile && type === 'send') {
+    return (
+      <div className="relative">
+        <a
+          href={ethereumUrl}
+          className="mt-2 px-4 py-2 text-white text-sm rounded-lg font-medium transition bg-green-600 hover:bg-green-700 flex items-center gap-2 inline-block"
+        >
+          💸 Open Wallet
+        </a>
+        {showCopied && (
+          <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-3 py-2 rounded shadow-lg whitespace-nowrap">
+            Address copied!
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <>
       <div className="relative">
         <button
-          onClick={handlePayment}
+          onClick={handleButtonClick}
           className={`mt-2 px-4 py-2 text-white text-sm rounded-lg font-medium transition ${
             type === 'request' 
               ? 'bg-blue-600 hover:bg-blue-700' 
@@ -105,12 +102,12 @@ export default function BasePaymentButton({
           {type === 'request' ? (
             <>📲 Request Payment</>
           ) : (
-            <>💸 {isMobile ? 'Open Wallet' : 'Show QR Code'}</>
+            <>💸 Show QR Code</>
           )}
         </button>
         {showCopied && (
           <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-3 py-2 rounded shadow-lg whitespace-nowrap">
-            Address copied! Open wallet app to send.
+            Address copied!
           </div>
         )}
       </div>

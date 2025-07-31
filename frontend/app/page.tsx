@@ -6,6 +6,7 @@ import { useAccount } from 'wagmi'
 import GroupList from '@/components/GroupList'
 import CreateGroup from '@/components/CreateGroup'
 import GroupDetails from '@/components/GroupDetails'
+import DeploymentCheck from '@/components/DeploymentCheck'
 
 export default function Home() {
   const { isConnected } = useAccount()
@@ -19,6 +20,8 @@ export default function Home() {
           <ConnectKitButton />
         </header>
 
+        <DeploymentCheck />
+        
         {!isConnected ? (
           <div className="text-center py-20">
             <h2 className="text-2xl font-semibold mb-4">Welcome to Base Splitwise</h2>

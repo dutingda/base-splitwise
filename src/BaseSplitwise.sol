@@ -42,6 +42,7 @@ contract BaseSplitwise {
     event ExpenseAdded(uint256 indexed groupId, uint256 indexed expenseId, address indexed payer, uint256 amount);
     event SettlementCalculated(uint256 indexed groupId, Settlement[] settlements);
     event PaymentMade(uint256 indexed groupId, address indexed from, address indexed to, uint256 amount);
+    event GroupDeleted(uint256 indexed groupId, address indexed deletedBy);
 
     modifier onlyGroupMember(uint256 groupId) {
         require(groups[groupId].isMember[msg.sender], "Not a group member");
@@ -230,5 +231,36 @@ contract BaseSplitwise {
         groups[groupId].balances[to] -= int256(amount);
         
         emit PaymentMade(groupId, msg.sender, to, amount);
+    }
+
+    function deleteGroup(uint256 groupId) external 
+        groupExists(groupId) 
+        onlyGroupMember(groupId) 
+    {
+        require(groups[groupId].creator == msg.sender, "Only creator can delete group");
+        
+        // Check if all balances are settled
+        Group storage group = groups[groupId];
+        for (uint256 i = 0; i < group.members.length; i++) {
+            require(group.balances[group.members[i]] == 0, "Group has unsettled balances");
+        }
+        
+        // Mark group as inactive
+        group.isActive = false;
+        
+        // Remove group from all members' userGroups
+        for (uint256 i = 0; i < group.members.length; i++) {
+            address member = group.members[i];
+            uint256[] storage memberGroups = userGroups[member];
+            for (uint256 j = 0; j < memberGroups.length; j++) {
+                if (memberGroups[j] == groupId) {
+                    memberGroups[j] = memberGroups[memberGroups.length - 1];
+                    memberGroups.pop();
+                    break;
+                }
+            }
+        }
+        
+        emit GroupDeleted(groupId, msg.sender);
     }
 }

@@ -64,7 +64,10 @@ export default function Home() {
             </div>
             <div className="lg:col-span-2">
               {selectedGroupId ? (
-                <GroupDetails groupId={selectedGroupId} />
+                <GroupDetails 
+                  groupId={selectedGroupId} 
+                  key={selectedGroupId}
+                />
               ) : (
                 <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
                   Select a group to view details

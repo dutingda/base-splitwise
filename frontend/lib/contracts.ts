@@ -159,6 +159,21 @@ export const CONTRACTS = {
           {"name": "to", "type": "address", "indexed": true},
           {"name": "amount", "type": "uint256", "indexed": false}
         ]
+      },
+      {
+        "type": "function",
+        "name": "deleteGroup",
+        "inputs": [{"name": "groupId", "type": "uint256"}],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "event",
+        "name": "GroupDeleted",
+        "inputs": [
+          {"name": "groupId", "type": "uint256", "indexed": true},
+          {"name": "deletedBy", "type": "address", "indexed": true}
+        ]
       }
     ]
   }

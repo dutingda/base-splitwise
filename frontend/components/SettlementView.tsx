@@ -4,6 +4,7 @@ import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAcc
 import { CONTRACTS } from '@/lib/contracts'
 import { baseSepolia } from 'wagmi/chains'
 import { formatEther } from 'viem'
+import BasePaymentButton from './BasePaymentButton'
 
 interface SettlementViewProps {
   groupId: number
@@ -18,6 +19,13 @@ export default function SettlementView({ groupId }: SettlementViewProps) {
     address: CONTRACTS.BaseSplitwise.address[baseSepolia.id] as `0x${string}`,
     abi: CONTRACTS.BaseSplitwise.abi,
     functionName: 'calculateSettlements',
+    args: [BigInt(groupId)],
+  })
+
+  const { data: group } = useReadContract({
+    address: CONTRACTS.BaseSplitwise.address[baseSepolia.id] as `0x${string}`,
+    abi: CONTRACTS.BaseSplitwise.abi,
+    functionName: 'groups',
     args: [BigInt(groupId)],
   })
 
@@ -64,24 +72,50 @@ export default function SettlementView({ groupId }: SettlementViewProps) {
                 <p className="font-semibold text-lg">
                   {formatEther(settlement.amount)} ETH
                 </p>
-                {settlement.from === address && (
-                  <button
-                    onClick={() => handlePayment(settlement.to, settlement.amount)}
-                    disabled={isPending || isConfirming}
-                    className="mt-2 px-4 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition disabled:bg-gray-400"
-                  >
-                    {isPending ? 'Signing...' : isConfirming ? 'Recording...' : 'Mark as Paid'}
-                  </button>
-                )}
+                <div className="flex flex-col gap-2 mt-2">
+                  {settlement.from === address ? (
+                    // User owes money - show send button
+                    <>
+                      <BasePaymentButton
+                        type="send"
+                        recipientAddress={settlement.to}
+                        amount={settlement.amount}
+                        description={`Splitwise payment for ${group?.[1] || 'group'}`}
+                      />
+                      <button
+                        onClick={() => handlePayment(settlement.to, settlement.amount)}
+                        disabled={isPending || isConfirming}
+                        className="px-4 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition disabled:bg-gray-400"
+                      >
+                        {isPending ? 'Signing...' : isConfirming ? 'Recording...' : 'Mark as Paid'}
+                      </button>
+                    </>
+                  ) : (
+                    // User is owed money - show request button
+                    <BasePaymentButton
+                      type="request"
+                      recipientAddress={settlement.from}
+                      amount={settlement.amount}
+                      description={`Splitwise payment for ${group?.[1] || 'group'}`}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <p className="text-sm text-blue-800">
-          <strong>Note:</strong> This records the payment in the app. You still need to send the actual ETH through your wallet or payment app.
-        </p>
+      <div className="mt-6 space-y-3">
+        <div className="p-4 bg-blue-50 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Base App Integration:</strong> Use the payment buttons to request or send money directly through the Base app.
+          </p>
+        </div>
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <p className="text-sm text-gray-700">
+            <strong>Manual Payment:</strong> After sending payment via Base or another method, click "Mark as Paid" to update the group balance.
+          </p>
+        </div>
       </div>
     </div>
   )

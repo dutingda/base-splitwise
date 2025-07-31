@@ -8,7 +8,8 @@ contract DeployScript is Script {
     function setUp() public {}
 
     function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        string memory privateKeyStr = vm.envString("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.parseUint(string.concat("0x", privateKeyStr));
         
         vm.startBroadcast(deployerPrivateKey);
         

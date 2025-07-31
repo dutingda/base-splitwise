@@ -78,7 +78,7 @@ function MemberItem({
   groupId: number
   isCreator: boolean 
 }) {
-  const { data: balance = 0n } = useReadContract({
+  const { data: balance = BigInt(0) } = useReadContract({
     address: CONTRACTS.BaseSplitwise.address[baseSepolia.id] as `0x${string}`,
     abi: CONTRACTS.BaseSplitwise.abi,
     functionName: 'getGroupBalance',
@@ -101,7 +101,7 @@ function MemberItem({
         {isCreator && <p className="text-xs text-gray-500">Group creator</p>}
       </div>
       <p className={`font-medium ${
-        balance > 0n ? 'text-green-600' : balance < 0n ? 'text-red-600' : 'text-gray-900'
+        balance > BigInt(0) ? 'text-green-600' : balance < BigInt(0) ? 'text-red-600' : 'text-gray-900'
       }`}>
         {formatBalance(balance)}
       </p>

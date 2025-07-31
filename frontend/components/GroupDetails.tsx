@@ -24,7 +24,7 @@ export default function GroupDetails({ groupId }: GroupDetailsProps) {
     args: [BigInt(groupId)],
   })
 
-  const { data: balance = 0n } = useReadContract({
+  const { data: balance = BigInt(0) } = useReadContract({
     address: CONTRACTS.BaseSplitwise.address[baseSepolia.id] as `0x${string}`,
     abi: CONTRACTS.BaseSplitwise.abi,
     functionName: 'getGroupBalance',
@@ -51,7 +51,7 @@ export default function GroupDetails({ groupId }: GroupDetailsProps) {
         <div className="mt-4">
           <p className="text-sm text-gray-600">Your Balance</p>
           <p className={`text-2xl font-semibold ${
-            balance > 0n ? 'text-green-600' : balance < 0n ? 'text-red-600' : 'text-gray-900'
+            balance > BigInt(0) ? 'text-green-600' : balance < BigInt(0) ? 'text-red-600' : 'text-gray-900'
           }`}>
             {formatBalance(balance)}
           </p>

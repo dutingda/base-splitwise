@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
 import { CONTRACTS } from '@/lib/contracts'
 import { baseSepolia } from 'wagmi/chains'
@@ -14,6 +15,7 @@ export default function SettlementView({ groupId }: SettlementViewProps) {
   const { address } = useAccount()
   const { writeContract, data: hash, isPending } = useWriteContract()
   const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash })
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null)
 
   const { data: settlements = [] } = useReadContract({
     address: CONTRACTS.BaseSplitwise.address[baseSepolia.id] as `0x${string}`,
@@ -35,6 +37,13 @@ export default function SettlementView({ groupId }: SettlementViewProps) {
       abi: CONTRACTS.BaseSplitwise.abi,
       functionName: 'recordPayment',
       args: [BigInt(groupId), to as `0x${string}`, amount],
+    })
+  }
+
+  const copyAddress = (addr: string) => {
+    navigator.clipboard.writeText(addr).then(() => {
+      setCopiedAddress(addr)
+      setTimeout(() => setCopiedAddress(null), 2000)
     })
   }
 
@@ -62,11 +71,23 @@ export default function SettlementView({ groupId }: SettlementViewProps) {
                 <p className="font-medium">
                   {settlement.from === address ? 'You owe' : 'You are owed by'}
                 </p>
-                <p className="text-sm text-gray-500">
-                  {settlement.from === address
-                    ? `${settlement.to.slice(0, 6)}...${settlement.to.slice(-4)}`
-                    : `${settlement.from.slice(0, 6)}...${settlement.from.slice(-4)}`}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-gray-500">
+                    {settlement.from === address
+                      ? `${settlement.to.slice(0, 6)}...${settlement.to.slice(-4)}`
+                      : `${settlement.from.slice(0, 6)}...${settlement.from.slice(-4)}`}
+                  </p>
+                  <button
+                    onClick={() => copyAddress(settlement.from === address ? settlement.to : settlement.from)}
+                    className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    {copiedAddress === (settlement.from === address ? settlement.to : settlement.from) ? (
+                      <>✓ Copied</>
+                    ) : (
+                      <>📋 Copy</>
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="text-right">
                 <p className="font-semibold text-lg">

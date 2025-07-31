@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+lib/
+
+# Foundry
+cache/
+out/
+
+# Environment
+.env
+.env.local
+
+# Frontend
+frontend/.next/
+frontend/out/
+frontend/dist/
+
+# Misc
+.DS_Store
+*.log
+.vscode/
+.idea/
